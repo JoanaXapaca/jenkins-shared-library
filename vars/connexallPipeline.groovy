@@ -60,12 +60,6 @@ def call(Map config = [:]) {
     		}
 	    }
 
-            stage('Coverage') {
-                steps {
-                    bat 'make coverage'
-                }
-            }
-
             stage('SonarQube') {
                 steps {
                     bat """
