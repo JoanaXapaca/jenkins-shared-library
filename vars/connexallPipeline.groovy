@@ -54,6 +54,12 @@ def call(Map config = [:]) {
                 }
             }
 
+	   stage('Accessibility') {
+    		steps {
+        		bat 'make a11y'
+    		}
+	    }
+
             stage('Coverage') {
                 steps {
                     bat 'make coverage'
