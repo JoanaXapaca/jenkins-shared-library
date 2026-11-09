@@ -60,6 +60,12 @@ def call(Map config = [:]) {
     		}
 	    }
 
+        stage('Container Integration Test') {
+            steps {
+                bat 'make test-integration'
+            }
+        }
+
             stage('SonarQube') {
                 steps {
                     bat """
