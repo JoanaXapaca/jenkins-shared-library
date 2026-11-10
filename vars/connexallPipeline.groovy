@@ -13,16 +13,16 @@ def call(Map config = [:]) {
         agent any
 
         environment {
-            JAVA_HOME = 'C:\\Program Files\\Eclipse Adoptium\\jdk-21.0.12.101-hotspot'
-            ANDROID_SDK_ROOT = 'C:\\Users\\jrego\\AppData\\Local\\Android\\Sdk'
-	    TMP = "${WORKSPACE}\\tmp"
-            TEMP = "${WORKSPACE}\\tmp"
-        }
+    		JAVA_HOME = 'C:\\Program Files\\Eclipse Adoptium\\jdk-21.0.12.101-hotspot'
+    		ANDROID_SDK_ROOT = 'C:\\Users\\jrego\\AppData\\Local\\Android\\Sdk'
+    		TMP = "${WORKSPACE}\\tmp"
+   		TEMP = "${WORKSPACE}\\tmp"
+}
 
         stages {
             stage('Checkout') {
                 steps {
-		    bat 'if not exist "%WORKSPACE%\\tmp" mkdir "%WORKSPACE%\\tmp"'
+		    bat 'if not exist "%TMP%" mkdir "%TMP%"'
                     checkout scm
                 }
             }
