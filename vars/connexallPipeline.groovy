@@ -1,74 +1,33 @@
 /**
  * Pipeline CI/CD generalizada da ConnexALL.
- *
- * Executa os stages comuns a todos os projetos (Go, Vue, Kotlin):
- * Checkout → Install → Lint → Type-check → Unit Tests → E2E Tests
- * → Coverage → SonarQube → Build → Audit Report.
- *
- * O contrato com cada projeto é o Makefile, que deve expor os alvos:
- * install, lint, type-check, test, test-e2e, coverage, build, sonar.
  */
 def call(Map config = [:]) {
     pipeline {
         agent any
 
         environment {
-    		JAVA_HOME = 'C:\\Program Files\\Eclipse Adoptium\\jdk-21.0.13.9-hotspot'
-    		ANDROID_SDK_ROOT = 'C:\\Users\\jrego\\AppData\\Local\\Android\\Sdk'
-    		TMP = "${WORKSPACE}\\tmp"
-   		TEMP = "${WORKSPACE}\\tmp"
-}
+            JAVA_HOME = 'C:\\Program Files\\Eclipse Adoptium\\jdk-21.0.13.9-hotspot'
+            ANDROID_SDK_ROOT = 'C:\\Users\\jrego\\AppData\\Local\\Android\\Sdk'
+            TMP = "${WORKSPACE}\\tmp"
+            TEMP = "${WORKSPACE}\\tmp"
+        }
 
         stages {
             stage('Checkout') {
                 steps {
-		    bat 'if not exist "%TMP%" mkdir "%TMP%"'
+                    bat 'if not exist "%TMP%" mkdir "%TMP%"'
                     checkout scm
                 }
             }
 
-            stage('Install') {
-                steps {
-                    bat 'make install'
-                }
-            }
+            stage('Install') { steps { bat 'make install' } }
+            stage('Lint') { steps { bat 'make lint' } }
+            stage('Type-check') { steps { bat 'make type-check' } }
+            stage('Unit Tests') { steps { bat 'make test' } }
+            stage('E2E Tests') { steps { bat 'make test-e2e' } }
+            stage('Accessibility') { steps { bat 'make a11y' } }
 
-            stage('Lint') {
-                steps {
-                    bat 'make lint'
-                }
-            }
-
-            stage('Type-check') {
-                steps {
-                    bat 'make type-check'
-                }
-            }
-
-            stage('Unit Tests') {
-                steps {
-                    bat 'make test'
-                }
-            }
-
-            stage('E2E Tests') {
-                steps {
-                    bat 'make test-e2e'
-                }
-            }
-
-	   stage('Accessibility') {
-    		steps {
-        		bat 'make a11y'
-    		}
-	    }
-
-        stage('Container Integration Test') {
-            steps {
-                bat 'make test-integration'
-            }
-        }
-
+            // 1. VALIDAR O CÓDIGO PRIMEIRO
             stage('SonarQube') {
                 steps {
                     bat """
@@ -78,9 +37,24 @@ def call(Map config = [:]) {
                 }
             }
 
+            // 2. COMPILAR OS ARTEFACTOS NATIVOS
             stage('Build') {
                 steps {
                     bat 'make build'
+                }
+            }
+
+            // 3. CONSTRUIR AS IMAGENS DOCKER (WRAPPING)
+            stage('Docker Build') {
+                steps {
+                    bat 'make docker-build'
+                }
+            }
+
+            // 4. LEVANTAR CONTAINERS E TESTAR COMUNICAÇÃO (Sem rebuild)
+            stage('Container Integration Test') {
+                steps {
+                    bat 'make test-integration'
                 }
             }
 
