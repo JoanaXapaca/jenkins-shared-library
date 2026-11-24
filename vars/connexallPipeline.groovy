@@ -15,50 +15,46 @@ def call(Map config = [:]) {
         environment {
             JAVA_HOME = 'C:\\Program Files\\Eclipse Adoptium\\jdk-21.0.13.9-hotspot'
             ANDROID_SDK_ROOT = 'C:\\Users\\jrego\\AppData\\Local\\Android\\Sdk'
+            TMP = "${WORKSPACE}\\tmp"
+            TEMP = "${WORKSPACE}\\tmp"
         }
 
         stages {
             stage('Checkout') {
                 steps {
+                    bat 'if not exist "%TMP%" mkdir "%TMP%"'
                     checkout scm
                 }
             }
 
             stage('Install') {
-                steps {
-                    bat 'make install'
-                }
+                steps { bat 'make install' }
             }
 
             stage('Lint') {
-                steps {
-                    bat 'make lint'
-                }
+                steps { bat 'make lint' }
+            }
+
+            // NOVO STAGE: FALHA RÁPIDO SE HOUVER VULNERABILIDADES
+            stage('Dependency Audit') {
+                steps { bat 'make audit' }
             }
 
             stage('Type-check') {
-                steps {
-                    bat 'make type-check'
-                }
+                steps { bat 'make type-check' }
             }
 
             stage('Unit Tests') {
-                steps {
-                    bat 'make test'
-                }
+                steps { bat 'make test' }
             }
 
             stage('E2E Tests') {
-                steps {
-                    bat 'make test-e2e'
-                }
+                steps { bat 'make test-e2e' }
             }
 
-	   stage('Accessibility') {
-    		steps {
-        		bat 'make a11y'
-    		}
-	    }
+            stage('Accessibility') {
+                steps { bat 'make a11y' }
+            }
 
             stage('SonarQube') {
                 steps {
@@ -70,9 +66,7 @@ def call(Map config = [:]) {
             }
 
             stage('Build') {
-                steps {
-                    bat 'make build'
-                }
+                steps { bat 'make build' }
             }
 
             stage('Audit Report') {
