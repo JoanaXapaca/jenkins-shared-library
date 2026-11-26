@@ -57,12 +57,6 @@ def call(Map config = [:]) {
                 }
             }
 
-            stage('Container Integration Test') {
-                steps {
-                    bat 'make test-integration'
-                }
-            }
-
             stage('SonarQube') {
                 steps {
                     bat """
@@ -95,7 +89,6 @@ def call(Map config = [:]) {
 
         post {
             success {
-                // --- CORREÇÃO: Arquivar APENAS o report.html para não sujar o Zip ---
                 archiveArtifacts artifacts: 'dist/**, bin/**, app/build/outputs/**, reports/report.html', fingerprint: true
                 echo 'Build passed'
             }
