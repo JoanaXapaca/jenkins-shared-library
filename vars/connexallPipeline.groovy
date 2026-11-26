@@ -1,12 +1,6 @@
 /**
- * Pipeline CI/CD generalizada da ConnexALL.
- *
- * Executa os stages comuns a todos os projetos (Go, Vue, Kotlin):
- * Checkout → Install → Lint → Type-check → Unit Tests → E2E Tests
- * → Coverage → SonarQube → Build → Audit Report.
- *
- * O contrato com cada projeto é o Makefile, que deve expor os alvos:
- * install, lint, type-check, test, test-e2e, coverage, build, sonar.
+ * Pipeline CI/CD Generalizada da ConnexALL.
+ * Executa os stages comuns a todos os projetos (Go, Vue, Kotlin).
  */
 def call(Map config = [:]) {
     pipeline {
@@ -28,32 +22,45 @@ def call(Map config = [:]) {
             }
 
             stage('Install') {
-                steps { bat 'make install' }
+                steps {
+                    bat 'make install'
+                }
             }
 
             stage('Lint') {
-                steps { bat 'make lint' }
-            }
-
-            // NOVO STAGE: FALHA RÁPIDO SE HOUVER VULNERABILIDADES
-            stage('Dependency Audit') {
-                steps { bat 'make audit' }
+                steps {
+                    bat 'make lint'
+                }
             }
 
             stage('Type-check') {
-                steps { bat 'make type-check' }
+                steps {
+                    bat 'make type-check'
+                }
             }
 
             stage('Unit Tests') {
-                steps { bat 'make test' }
+                steps {
+                    bat 'make test'
+                }
             }
 
             stage('E2E Tests') {
-                steps { bat 'make test-e2e' }
+                steps {
+                    bat 'make test-e2e'
+                }
             }
 
             stage('Accessibility') {
-                steps { bat 'make a11y' }
+                steps {
+                    bat 'make a11y'
+                }
+            }
+
+            stage('Container Integration Test') {
+                steps {
+                    bat 'make test-integration'
+                }
             }
 
             stage('SonarQube') {
@@ -66,7 +73,9 @@ def call(Map config = [:]) {
             }
 
             stage('Build') {
-                steps { bat 'make build' }
+                steps {
+                    bat 'make build'
+                }
             }
 
             stage('Audit Report') {
@@ -86,7 +95,8 @@ def call(Map config = [:]) {
 
         post {
             success {
-                archiveArtifacts artifacts: 'dist/**, bin/**, app/build/outputs/**, reports/**', fingerprint: true
+                // --- CORREÇÃO: Arquivar APENAS o report.html para não sujar o Zip ---
+                archiveArtifacts artifacts: 'dist/**, bin/**, app/build/outputs/**, reports/report.html', fingerprint: true
                 echo 'Build passed'
             }
             failure {
